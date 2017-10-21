@@ -60,7 +60,7 @@ private:
 
     static void token_topologie(const std::string& );
 
-    static void save_path(std::string& );
+    static void save_path(const std::string& );
 
     static void load_file();
 
