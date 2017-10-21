@@ -9,6 +9,7 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <boost/algorithm/string.hpp>
 
 template <typename T>
 constexpr T END_CHAR = T(']');
@@ -51,7 +52,7 @@ public:
 
 private:
    
-
+   
     static void fileProcess(const std::string& );
 
     static void topologieProcess(const std::string& );
@@ -63,6 +64,10 @@ private:
     static void save_path(const std::string& );
 
     static void load_file();
+
+    static void createTxtFile(std::string&& );
+
+    static void prepareImage();
 
 public :
     

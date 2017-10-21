@@ -17,6 +17,8 @@
 #include <cstdlib>
 #include <exception>
 #include <string>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 std::map<int, std::vector<std::string>> Reader::f_name_;
 /*Init static var */
@@ -74,9 +76,26 @@ void Reader::save_path(const std::string& path)
     Reader::path_ = path;
 }
 
-void readImage(std::string& file_name, std::vector<double> inputs)
+void Reader::createTxtFile(std::string&& file_name)
 {
-    auto file = std::ifstream(file_name, std::ifstream::in);
+    cv::Mat image ;
+    image = cv::imread("file", CV_LOAD_IMAGE_GRAYSCALE);
+}
+
+void Reader::prepareImage()
+{
+     for (unsigned i = 0; i < Reader::f_name_.size(); i++)
+        for (unsigned j = 0; j < Reader::f_name_[i].size(); j++) /*cross all the file of each index*/
+            createTxtFile(std::string(path_ + "/" +Reader::f_name_[i][j]));
+}
+
+
+
+void readImage(std::string& file_name, std::vector<double>& inputs)
+{
+    std::string new_name(file_name);
+    boost::replace_all(new_name, ".jpg", ".txt");
+    auto file = std::ifstream(new_name, std::ifstream::in);
     if (file)
     {
         bool process = true;
