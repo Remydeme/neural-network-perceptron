@@ -45,7 +45,7 @@ const Reader& Reader::getInstance()
 
 bool good_file_format_input(const std::string& input)
 {
-    const boost::regex expr{"\\[(\\((\\w.)+(, ?[\\w.]+)*\\)(, ?\\((\\w.)+(, ?[\\w]+)*\\))* ?)+\\]"};
+    const boost::regex expr{"\\[(\\([\\w.]+(, ?[\\w.]+)*\\)(,[ ]*\\([ ]*[\\w.]+([ ]*,[ ]*[\\w.]+[ ]*)*[ ]*\\))*[ ]*?)+\\]"};
     boost::smatch what;
     if (boost::regex_search(input, what, expr))
         return true;
@@ -64,7 +64,6 @@ void Reader::token_file(const std::string& file)
             continue;
         boost::char_separator<char> sep{","};
         tokenizer tok_sub{t, sep};
-        std::cout << "Token " << t << "\n";
         for (const auto &itt : tok_sub)
             Reader::f_name_[index].push_back(itt);
         ++index;
@@ -86,6 +85,7 @@ void Reader::createTxtFile(std::string&& file_name, std::vector<double>& inputs)
     if (image_tmp.data)
     {
         for (int i = 0; i < image_tmp.size().height ; i++)
+        {
             for (int j = 0; j < image_tmp.size().width; j++)
             {
                 double var = double(image_tmp.at<uint8_t>(i, j));
@@ -93,9 +93,12 @@ void Reader::createTxtFile(std::string&& file_name, std::vector<double>& inputs)
                     var = 0.0;
                 else
                     var = 1.0;
+                std::cout << var << " ";
                 inputs.push_back(var);
             }
-        std::cout << "\n";
+            std::cout << "\n";
+        }
+            
     }
     else
         throw std::runtime_error("File not found for training. Stop the loading !");
@@ -134,17 +137,13 @@ void Reader::load_file()
 
 void Reader::fileProcess(const std::string& file)
 {
-    try
-    {
         if (good_file_format_input(file))
+        {
+            std::cout << "Dop " << "\n";
             token_file(file);
+        }
         else
             throw std::runtime_error("Bad input format enter ./Net --h for help !");
-    }
-    catch(std::exception& exception)
-    {
-        std::cout << exception.what();
-    }
 }
 
 bool good_topologie_input(const std::string& input)
