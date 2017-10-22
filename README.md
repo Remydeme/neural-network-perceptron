@@ -13,6 +13,6 @@ launche make
 
 ###--file () = list of file of the same pattern
 ###--t [L,L,L] = size of each layer. For an output of 3 variables, you have to enter 4 because you have the bias neurone.
-### So L = (number_wanted + 1)
+  So L = (number_wanted + 1)
 ###--size "[height, width]" size wanted
 ###--path the location of the files input files. If they are in the current workspace path arg is.""
