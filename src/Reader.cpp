@@ -7,6 +7,7 @@
 //
 
 #include "Reader.hpp"
+#include <array>
 #include <fstream>
 #include <iostream>
 #include <boost/program_options/options_description.hpp>
@@ -17,8 +18,6 @@
 #include <cstdlib>
 #include <exception>
 #include <string>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
 
 std::map<int, std::vector<std::string>> Reader::f_name_;
 /*Init static var */
@@ -29,6 +28,7 @@ std::string Reader::path_{"."};
 std::vector<unsigned> Reader::topologie_;
 std::map<int, Reader::inputPool> Reader::input_files_;
 std::map<int, std::vector<double>> Reader::targets_map_;
+cv::Size Reader::size_(100,100);
 
 unsigned int Reader::input_vector_index_ = 0;
 /**
@@ -66,11 +66,7 @@ void Reader::token_file(const std::string& file)
         tokenizer tok_sub{t, sep};
         std::cout << "Token " << t << "\n";
         for (const auto &itt : tok_sub)
-        {
-            std::cout << "file name " << itt << std::endl;
             Reader::f_name_[index].push_back(itt);
-            std::cout << "size index 2 : " << Reader::f_name_[index].size() << "\n";
-        }
        ++index;
     }
 }
@@ -83,16 +79,23 @@ void Reader::save_path(const std::string& path)
 void Reader::createTxtFile(std::string&& file_name, std::vector<double>& inputs)
 {
     cv::Mat image ;
+    cv::Mat image_tmp;
     image = cv::imread(file_name.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
-    if (image.data)
+    image_tmp = image;
+    cv::resize(image, image_tmp, Reader::size_);
+    if (image_tmp.data)
     {
-        std::cout << "Image open " << std::endl;
-        for (int i = 0; i < image.size().height ; i++)
-            for (int j = 0; j < image.size().width; j++)
+        for (int i = 0; i < image_tmp.size().height ; i++)
+            for (int j = 0; j < image_tmp.size().width; j++)
             {
-                double var = double(image.at<uint8_t>(i, j));
+                double var = double(image_tmp.at<uint8_t>(i, j));
+                if (var > 100)
+                    var = 0.0;
+                else
+                    var = 1.0;
                 inputs.push_back(var);
             }
+            std::cout << "\n";
     }
     else
         throw std::runtime_error("File not found for training. Stop the loading !");
@@ -100,17 +103,13 @@ void Reader::createTxtFile(std::string&& file_name, std::vector<double>& inputs)
 
 void Reader::load_file()
 {
-    std::cout << "Loading files " << std::endl;
-    std::cout << "File Number " << Reader::f_name_.size() << std::endl;
     for (unsigned i = 0; i < Reader::f_name_.size(); i++)
         for (unsigned j = 0; j < Reader::f_name_[i].size(); j++)
         {
             std::vector<double> image_vector;
             auto image_name (std::string(path_ + "/" +Reader::f_name_[i][j]));
-            std::cout <<"picture name " <<image_name << std::endl;
             Reader::input_files_[i].push_back(std::vector<double>());
             createTxtFile(image_name.c_str(), input_files_[i].back());
-            std::cout << "Input size : " << input_files_.size() << "size :" << input_files_[i].back().size() << "\n";
         }
 
     for (unsigned i = 0; i < input_files_.size(); i++)
@@ -157,6 +156,26 @@ bool good_topologie_input(const std::string& input)
 
 }
 
+void Reader::save_size(const std::string& size)
+{
+    const boost::regex rgx("\\[[ ]*\\d[ ]*,[ ]*\\d[ ]*\\]");
+    boost::smatch what;
+    if (boost::regex_search(size, what, rgx))
+        throw std::runtime_error("Bad size argument enter ./Net --h for help");
+    
+    using tokenizer = boost::tokenizer<boost::char_separator<char>>;
+    
+    boost::char_separator<char> sep{"[],"};
+    tokenizer tok{size, sep};
+    auto index = 0;
+    std::array<int, 2> dims;
+    for (const auto &t : tok)
+    {
+        dims[index] = std::stol(t);
+        index++;
+    }
+    Reader::size_ = cv::Size(dims[0], dims[1]);
+}
 
 void Reader::token_topologie(const std::string& topologie)
 {
@@ -184,7 +203,6 @@ void Reader::topologieProcess(const std::string& topologie)
     }
     catch(const std::exception& error)
     {
-        std::cout << "bad topologie inputs" << "\n";
         std::cout << error.what() << "\n";
     }
 }
@@ -206,6 +224,7 @@ void Reader::parseInput(int argc, char *argv[])
              are not tolerated and the brackets are riquired\n")
 
             ("path", value<std::string>()->notifier(Reader::save_path), "\"path\"\n")
+            ("size", value<std::string>()->notifier(Reader::save_size), "Size of the input file --size \"[h, w]\"")
 
             /* --t topologie input caracteristics */
             ("t", value<std::string>()->notifier(Reader::topologieProcess),\
@@ -218,6 +237,8 @@ void Reader::parseInput(int argc, char *argv[])
 
         if (vm.count("help"))
             std::cout << optionDesc << "\n";
+        if (!(vm.count("file") && vm.count("size") && vm.count("t")))
+            throw std::runtime_error("bad input arguments ./Net --help");
         Reader::load_file();
     }
     catch (const error& exception)
@@ -237,19 +258,15 @@ void Reader::incIndex()
     Reader::index_++;
     if (Reader::index_ >= input_files_.size())
             Reader::index_ = 0;
-
-
 }
 
 void Reader::readInput(std::vector<double>& inputs)
 {
-    std::cout << "Read " << index_ << " " << input_vector_index_ << " " <<  std::endl;
     auto size = input_files_[Reader::index_].size() - 1;
     auto back = input_files_[Reader::index_].begin() + size;
     inputs = input_files_[Reader::index_][size];
     input_files_[Reader::index_].erase(back);
     input_files_[Reader::index_].push_back(inputs);
-    std::cout << "Done read" << std::endl;
 }
 
 

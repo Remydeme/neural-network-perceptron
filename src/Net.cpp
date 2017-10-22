@@ -44,10 +44,8 @@ void Net::feedForward(const std::vector<double> &inputVals)
       //  assert(inputVals.size() == (layers_.size() - 1));
     #endif
     /* the output of the first layer is the input value */
-    std::cout << "Input val " << std::endl;
     for (unsigned nodeNum = 0; nodeNum < inputVals.size(); nodeNum++)
         layers_[0][nodeNum].outputValue_set(inputVals[nodeNum]);
-    std::cout << "Input val " << std::endl;
     /* feedForward on the other nodes */
     for (unsigned layerNum = 1; layerNum < layers_.size(); layerNum++) /*fix here remove - 1*/
     

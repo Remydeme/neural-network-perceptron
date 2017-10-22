@@ -10,6 +10,9 @@
 #include <vector>
 #include <map>
 #include <boost/algorithm/string.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 template <typename T>
 constexpr T END_CHAR = T(']');
@@ -69,6 +72,8 @@ private:
 
     static void createTxtFile(std::string&&, std::vector<double>& );
 
+    static void save_size(const std::string& );
+
 public :
     
     static std::vector<unsigned> topologie_;
@@ -81,4 +86,5 @@ private:
     static std::map<int, std::vector<std::string>> f_name_;
     static std::map<int, inputPool> input_files_;
     static std::map<int, std::vector<double>> targets_map_;
+    static cv::Size size_; 
 };
