@@ -17,4 +17,4 @@
 
 ## NOTE
 
-Note that the implementation is not optimised. The complexity for 3 layers with L1, L2 and L3 containing x, y, z neurons respeThisctively the complexity will be C = (x * y + y * z + z). The future version will use Matrix or multithreading.
+Note that the implementation is not optimised. The complexity for 3 layers with L1, L2 and L3 containing x, y, z neurons respectively the complexity will be C = (x * y + y * z + z). The future version will use Matrix or multithreading.
