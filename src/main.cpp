@@ -9,16 +9,17 @@
 #include <iostream>
 #include <fstream>
 #include <map>
-
+#include <exception>
 
 #include "Net.hpp"
 #include "Reader.hpp"
 
 int main(int argc, char *argv[])
-{
+{ try
+   {
     if (argc >= 2)
     {
-        Reader::parseInput(argc, argv);
+               Reader::parseInput(argc, argv);
         std::cout << "Parsing DOne !" << std::endl;
         Net my_net{Reader::topologie_};
         auto i = 0;
@@ -37,7 +38,6 @@ int main(int argc, char *argv[])
             std::cout << "Backprop done" << std::endl;
             my_net.getResults(res);
             std::cout << "\n \n expected ";
-            std::cout << "Size : " << Reader::output().size() << "\n";
             for (const auto &it : Reader::output())
                 std::cout << it << " ";
             std::cout << "\n ";
@@ -50,7 +50,12 @@ int main(int argc, char *argv[])
         }
     }
     else
-        std::cout << " Not enough arguments launch ./Net --h for help. " << "\n";
+        std::cout << " Not enough arguments launch ./Net --h for help. ";
+    }
+    catch(std::exception& error)
+    {
+        std::cout << error.what() << "\n";
+    }
 }
 
 /*
