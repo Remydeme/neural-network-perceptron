@@ -49,6 +49,8 @@ public:
      * \brief get the next expected output
      */
     static const std::vector<double>& output();
+    
+    static void incIndex();
 
 private:
    
@@ -65,17 +67,16 @@ private:
 
     static void load_file();
 
-    static void createTxtFile(std::string&& );
-
-    static void prepareImage();
+    static void createTxtFile(std::string&&, std::vector<double>& );
 
 public :
     
     static std::vector<unsigned> topologie_;
 
 private:
+    static unsigned int index_;
     static std::string path_; 
-    static unsigned int index_; 
+    static unsigned int input_vector_index_;
     static unsigned int max_input_;
     static std::map<int, std::vector<std::string>> f_name_;
     static std::map<int, inputPool> input_files_;

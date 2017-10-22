@@ -24,11 +24,13 @@ std::map<int, std::vector<std::string>> Reader::f_name_;
 /*Init static var */
 
 unsigned Reader::max_input_ = 0;
+
 std::string Reader::path_{"."};
 std::vector<unsigned> Reader::topologie_;
 std::map<int, Reader::inputPool> Reader::input_files_;
 std::map<int, std::vector<double>> Reader::targets_map_;
 
+unsigned int Reader::input_vector_index_ = 0;
 /**
  *\var index_ variable that indicate the next file
  */
@@ -43,7 +45,7 @@ const Reader& Reader::getInstance()
 
 bool good_file_format_input(const std::string& input)
 {
-    const boost::regex expr{"\\[(\\(([\\w ]+,?)+\\)+,?)+\\]"};
+    const boost::regex expr{"\\[(\\(([\\w  .]+,?)+\\)+,?)+\\]"};
     boost::smatch what;
     if (boost::regex_search(input, what, expr))
         return true;
@@ -55,19 +57,21 @@ void Reader::token_file(const std::string& file)
     using tokenizer = boost::tokenizer<boost::char_separator<char>>;
     boost::char_separator<char> sep{"()"};
     tokenizer tok{file, sep};
+    auto index = 0;
     for (const auto &t : tok)
     {
         if (t == "," || t == "" ||t == "]" || t == "[")
             continue;
         boost::char_separator<char> sep{","};
         tokenizer tok_sub{t, sep};
-        auto index = 0;
+        std::cout << "Token " << t << "\n";
         for (const auto &itt : tok_sub)
         {
-            std::string fileName(itt);
+            std::cout << "file name " << itt << std::endl;
             Reader::f_name_[index].push_back(itt);
-            ++index;
+            std::cout << "size index 2 : " << Reader::f_name_[index].size() << "\n";
         }
+       ++index;
     }
 }
 
@@ -76,59 +80,57 @@ void Reader::save_path(const std::string& path)
     Reader::path_ = path;
 }
 
-void Reader::createTxtFile(std::string&& file_name)
+void Reader::createTxtFile(std::string&& file_name, std::vector<double>& inputs)
 {
     cv::Mat image ;
-    image = cv::imread("file", CV_LOAD_IMAGE_GRAYSCALE);
-}
-
-void Reader::prepareImage()
-{
-     for (unsigned i = 0; i < Reader::f_name_.size(); i++)
-        for (unsigned j = 0; j < Reader::f_name_[i].size(); j++) /*cross all the file of each index*/
-            createTxtFile(std::string(path_ + "/" +Reader::f_name_[i][j]));
-}
-
-
-
-void readImage(std::string& file_name, std::vector<double>& inputs)
-{
-    std::string new_name(file_name);
-    boost::replace_all(new_name, ".jpg", ".txt");
-    auto file = std::ifstream(new_name, std::ifstream::in);
-    if (file)
+    image = cv::imread(file_name.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+    if (image.data)
     {
-        bool process = true;
-        char garbage = 0;
-        file >> garbage;
-        while (process && file.good())
-        {
-            double input = 0.0;
-            file >> input; // get the value
-            file >> garbage; // get the ','
-            if (garbage == END_CHAR<double>)
+        std::cout << "Image open " << std::endl;
+        for (int i = 0; i < image.size().height ; i++)
+            for (int j = 0; j < image.size().width; j++)
             {
-                process = false;
+                double var = double(image.at<uint8_t>(i, j));
+                inputs.push_back(var);
             }
-            inputs.push_back(input); // puts in the vector
-        }
     }
-
+    else
+        throw std::runtime_error("File not found for training. Stop the loading !");
 }
 
 void Reader::load_file()
 {
+    std::cout << "Loading files " << std::endl;
+    std::cout << "File Number " << Reader::f_name_.size() << std::endl;
     for (unsigned i = 0; i < Reader::f_name_.size(); i++)
-    {
-        for (unsigned j = 0; j < Reader::f_name_[i].size(); j++) /*cross all the file of each index*/
+        for (unsigned j = 0; j < Reader::f_name_[i].size(); j++)
         {
             std::vector<double> image_vector;
-            // here we call the function to load
-            // information of the picture in the image_vector
-            Reader::input_files_[i].push_back(image_vector); /* put the vector read in the file_input*/
+            auto image_name (std::string(path_ + "/" +Reader::f_name_[i][j]));
+            std::cout <<"picture name " <<image_name << std::endl;
+            Reader::input_files_[i].push_back(std::vector<double>());
+            createTxtFile(image_name.c_str(), input_files_[i].back());
+            std::cout << "Input size : " << input_files_.size() << "size :" << input_files_[i].back().size() << "\n";
         }
+
+    for (unsigned i = 0; i < input_files_.size(); i++)
+    {
+        std::vector<double> outputs;
+        for (unsigned j = 0; j < input_files_.size(); j++)
+        {
+            if (j == i)
+                outputs.push_back(1.0);
+            else
+                outputs.push_back(0.0);
+        }
+        targets_map_[i] = outputs;
     }
 }
+
+
+
+
+
 
 void Reader::fileProcess(const std::string& file)
 {
@@ -136,6 +138,8 @@ void Reader::fileProcess(const std::string& file)
     {
         if (good_file_format_input(file))
             token_file(file);
+        else
+            throw std::runtime_error("Bad input format enter ./Net --h for help !");
     }
     catch(std::exception& exception)
     {
@@ -228,23 +232,24 @@ const std::vector<double>& Reader::output()
     return Reader::targets_map_[Reader::index_];
 }
 
+void Reader::incIndex()
+{
+    Reader::index_++;
+    if (Reader::index_ >= input_files_.size())
+            Reader::index_ = 0;
+
+
+}
 
 void Reader::readInput(std::vector<double>& inputs)
 {
-    auto size =  input_files_[Reader::index_].size() - 1;
+    std::cout << "Read " << index_ << " " << input_vector_index_ << " " <<  std::endl;
+    auto size = input_files_[Reader::index_].size() - 1;
     auto back = input_files_[Reader::index_].begin() + size;
-
-
-    /* get the next input and move it at the end of the vector */
     inputs = input_files_[Reader::index_][size];
-
     input_files_[Reader::index_].erase(back);
-
-    input_files_[Reader::index_].emplace_back(inputs);
-
-    if (Reader::index_ >= Reader::max_input_)
-        Reader::index_ = 0;
-
+    input_files_[Reader::index_].push_back(inputs);
+    std::cout << "Done read" << std::endl;
 }
 
 
