@@ -136,6 +136,6 @@ private:
     double outputValue_;
     double gradient_;
     std::vector<Connection> outputWeights_;
-    unsigned nextLayerSize_;
+    unsigned nextLayerSize_ ;
     unsigned myIndex_;
 };
