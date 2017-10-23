@@ -139,7 +139,6 @@ void Reader::fileProcess(const std::string& file)
 {
         if (good_file_format_input(file))
         {
-            std::cout << "Dop " << "\n";
             token_file(file);
         }
         else
@@ -262,69 +261,3 @@ void Reader::readInput(std::vector<double>& inputs)
     input_files_[Reader::index_].push_back(inputs);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-   auto file = std::ifstream(file_name, std::ifstream::in);
-   if (file)
-   {
-   bool process = true;
-   char garbage = 0;
-   file >> garbage;
-   while (process && file.good())
-   {
-   double input = 0.0;
-   file >> input; // get the value
-   file >> garbage; // get the ','
-   if (garbage == END_CHAR<double>)
-   {
-   process = false;
-   }
-   inputs.push_back(input); // puts in the vector
-   }
-   }
- */
-
-/*
-   void Reader::inputOutputGen(std::map<int, std::string>& inputs, std::map<std::string, std::vector<double>>& targets, int range)
-   {
-   std::map<int, std::string> F_NAME;
-   f_name_init(F_NAME);
-
-// create our inputs map
-for (int i = 0; i < range; i++)
-inputs[i] = F_NAME.at(i);
-
-// create  our targets map
-std::vector<double> outputs;
-for (int i = 0; i < range; i++)
-{
-for (int j = 0; j < range; j++)
-{
-if (j == i)
-outputs.push_back(1.0);
-else
-outputs.push_back(0.0);
-}
-targets[F_NAME[i]] = outputs;
-outputs.clear();
-}
-}*/

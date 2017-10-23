@@ -11,6 +11,9 @@
 
 #include "Neuron.hpp"
 
+template <typename T>
+T THREAD_MAX = T(7);
+
 using Layer = std::vector<Neuron>;
 
 class Net
@@ -40,11 +43,17 @@ class Net
      *\fn void getResults(std::vector<double>& )
      */
     void getResults(std::vector<double>& res) const;
+private:
     
+    void calc_layer_weight(Layer&, Layer& );
+    void treat_hidden_neurone(Layer& , Layer&);
+    void feed_neurone(Layer&, Layer&);
+
 private:
     
     std::vector<unsigned> topologie_; // network configuration
     std::vector<Layer> layers_; // layers_[layer_num][node_index]
     double mError_ = 0.0;
+    unsigned neurone_index_ = 0;
     
 };
