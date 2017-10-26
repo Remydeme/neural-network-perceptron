@@ -16,9 +16,8 @@
 #### --size "[height, width]" size wanted.
 #### --path the location of the files input files. If they are in the current workspace path arg is."".
 
-## NOTE
 
-Note that the implementation is not optimised. The complexity for 3 layers with L1, L2 and L3 containing x, y, z neurons respectively the complexity will be C = (x * y + y * z + z). The future version will use Matrix or multithreading.
-##Note : add opencv_improc and opencv_imgcodecs for imread function be 
-##able to run 
->>>>>>> [NETWORK][SRC] - Readme.md update
+## dependencies
+  
+  ### Boost
+  ### Opencv
