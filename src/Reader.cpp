@@ -7,22 +7,22 @@
 //
 
 #include "Reader.hpp"
+
 #include <array>
-#include <fstream>
-#include <iostream>
-#include <boost/program_options/options_description.hpp>
 #include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
-#include <regex>
 #include <cstdlib>
 #include <exception>
+#include <fstream>
+#include <iostream>
+#include <regex>
 #include <string>
 
 std::map<int, std::vector<std::string>> Reader::f_name_;
 /*Init static var */
 
-unsigned Reader::max_input_ = 0;
 
 std::string Reader::path_{"."};
 std::vector<unsigned> Reader::topologie_;
@@ -30,7 +30,6 @@ std::map<int, Reader::inputPool> Reader::input_files_;
 std::map<int, std::vector<double>> Reader::targets_map_;
 cv::Size Reader::size_(100,100);
 
-unsigned int Reader::input_vector_index_ = 0;
 /**
  *\var index_ variable that indicate the next file
  */
