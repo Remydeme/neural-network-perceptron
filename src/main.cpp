@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
         std::cout << "Parsing DOne !" << std::endl;
         Net my_net{Reader::topologie_};
         auto i = 0;
-        while (i < 6000)
+        while (i < 600)
         {
             std::cout << "starting loop " << std::endl;
             std::vector<double> inputs;
