@@ -69,7 +69,7 @@ void Reader::save_path(const std::string& path)
     Reader::path_ = path;
 }
 
-void Reader::createTxtFile(std::string&& file_name, std::vector<double>& inputs)
+void Reader::createImageVector(std::string&& file_name, std::vector<double>& inputs)
 {
     cv::Mat image ;
     image = cv::imread(file_name.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
@@ -78,21 +78,14 @@ void Reader::createTxtFile(std::string&& file_name, std::vector<double>& inputs)
     cv::resize(image, image_tmp, Reader::size_);
     if (image_tmp.data)
     {
-        for (int i = 0; i < image_tmp.size().height ; i++)
+        for (int i = 0; i < Reader::size_.height ; i++)
         {
-            for (int j = 0; j < image_tmp.size().width; j++)
+            for (int j = 0; j < Reader::size_.width; j++)
             {
-                double var = double(image_tmp.at<uint8_t>(i, j));
-                if (var > 100)
-                    var = -1.0;
-                else
-                    var = 1.0;
-                std::cout << var << " ";
+                auto var = double(image_tmp.at<uint8_t>(i, j)) > 100 ? - 1.00 : 1.00;
                 inputs.push_back(var);
             }
-            std::cout << "\n";
         }
-            
     }
     else
         throw std::runtime_error("File not found for training. Stop the loading !");
@@ -106,7 +99,7 @@ void Reader::load_file()
             std::vector<double> image_vector;
             auto image_name (std::string(path_ + "/" +Reader::f_name_[i][j]));
             Reader::input_files_[i].push_back(std::vector<double>());
-            createTxtFile(image_name.c_str(), input_files_[i].back());
+            createImageVector(image_name.c_str(), input_files_[i].back());
         }
     /* save the name of all the input files for the training part */
 
@@ -179,7 +172,6 @@ void Reader::token_topologie(const std::string& topologie)
     {
         if (t == "," || t == "" ||t == "]" || t == "[")
             continue;
-        std::cout << " out " << t << "\n";
         unsigned value = std::stoi(t);
         topologie_.push_back(value);
     }
@@ -216,12 +208,15 @@ void Reader::parseInput(int argc, char *argv[])
 
 
     variables_map vm;
+    /*parse and store the input args using optionDesc var as inputs description*/
     store(parse_command_line(argc, argv, optionDesc), vm);
     notify(vm);
 
     if (vm.count("help"))
         std::cout << optionDesc << "\n";
-    if (!(vm.count("file") && vm.count("size") && vm.count("t")))
+    if (vm.count("size") && !(vm.count("file") && vm.count("t")))
+        throw std::runtime_error("bad input arguments ./Net --help");
+    if (!(vm.count("file") && vm.count("t")))
         throw std::runtime_error("bad input arguments ./Net --help");
     Reader::load_file();
 }

@@ -83,7 +83,7 @@ private:
 
     static void load_file();
 
-    static void createTxtFile(std::string&&, std::vector<double>& );
+    static void createImageVector(std::string&&, std::vector<double>& );
 
     static void save_size(const std::string& );
 
