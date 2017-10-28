@@ -36,16 +36,10 @@ unsigned int Reader::input_vector_index_ = 0;
  */
 unsigned int Reader::index_ = 0;
 
-const Reader& Reader::getInstance()
-{
-    static Reader read;
-
-    return read;
-}
 
 bool good_file_format_input(const std::string& input)
 {
-    const boost::regex expr{"\\[(\\([\\w.]+(, ?[\\w.]+)*\\)(,[ ]*\\([ ]*[\\w.]+([ ]*,[ ]*[\\w.]+[ ]*)*[ ]*\\))*[ ]*?)+\\]"};
+    const boost::regex expr(INPUT_REGEX<const char*>);
     boost::smatch what;
     if (boost::regex_search(input, what, expr))
         return true;
@@ -90,7 +84,7 @@ void Reader::createTxtFile(std::string&& file_name, std::vector<double>& inputs)
             {
                 double var = double(image_tmp.at<uint8_t>(i, j));
                 if (var > 100)
-                    var = 0.0;
+                    var = -1.0;
                 else
                     var = 1.0;
                 std::cout << var << " ";
@@ -147,7 +141,7 @@ void Reader::fileProcess(const std::string& file)
 
 bool good_topologie_input(const std::string& input)
 {
-    const boost::regex rgx("\\[([ ]*(\\d)+[ ]*([ ]*,[ ]*[\\d]+[ ]*)*)+\\]");
+    const boost::regex rgx(TOPOLOGIE_REGEX<const char*>);
     boost::smatch what;
     if (boost::regex_search(input, what, rgx))
         return true;
@@ -157,7 +151,7 @@ bool good_topologie_input(const std::string& input)
 
 void Reader::save_size(const std::string& size)
 {
-    const boost::regex rgx("\\[[ ]*\\d[ ]*,[ ]*\\d[ ]*\\]");
+    const boost::regex rgx(SAVE_REGEX<const char*>);
     boost::smatch what;
     if (boost::regex_search(size, what, rgx))
         throw std::runtime_error("Bad size argument enter ./Net --h for help");
@@ -193,17 +187,10 @@ void Reader::token_topologie(const std::string& topologie)
 
 void Reader::topologieProcess(const std::string& topologie)
 {
-    try
-    {
         if (good_topologie_input(topologie))
             token_topologie(topologie);
         else
             throw std::runtime_error("Bad input look for the help part ./Net -h");
-    }
-    catch(const std::exception& error)
-    {
-        std::cout << error.what() << "\n";
-    }
 }
 
 void Reader::parseInput(int argc, char *argv[])

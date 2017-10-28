@@ -20,6 +20,16 @@ constexpr T END_CHAR = T(']');
 template <typename T>
 constexpr T DIGIT_LIM = T(4);
 
+/**/
+template <typename S>
+constexpr S INPUT_REGEX = "\\[(\\([\\w.]+(, ?[\\w.]+)*\\)(,[ ]*\\([ ]*[\\w.]+([ ]*,[ ]*[\\w.]+[ ]*)*[ ]*\\))*[ ]*?)+\\]";
+
+template <typename S>
+constexpr S TOPOLOGIE_REGEX = "\\[([ ]*(\\d)+[ ]*([ ]*,[ ]*[\\d]+[ ]*)*)+\\]";
+
+template <typename S>
+constexpr S SAVE_REGEX = "\\[[ ]*\\d[ ]*,[ ]*\\d[ ]*\\]";
+
 class Reader
 {
 
@@ -29,14 +39,13 @@ public:
     
 public:
     
-    static const Reader& getInstance();
     Reader(Reader& ) = delete;
+    Reader(Reader&& ) = delete;
     Reader(const Reader& ) = delete;
 
 private :
 
     Reader() = default;
-  
     
 public:
     
@@ -53,6 +62,10 @@ public:
      */
     static const std::vector<double>& output();
     
+    /**
+    *\fnc 
+    * \brief increment the index_ var 
+    */
     static void incIndex();
 
 private:
